@@ -1,0 +1,6 @@
+---
+# tasks file for robstercork.containerd
+- name: Install containerd.
+  package:
+    name: "{{ containerd_package }}"
+    state: "{{ containerd_package_state }}"

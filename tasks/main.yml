@@ -1,6 +1,52 @@
 ---
-# tasks file for robstercork.containerd
-- name: Install containerd.
-  package:
-    name: "{{ containerd_package }}"
-    state: "{{ containerd_package_state }}"
+
+- name: Create containerd.conf
+  copy:
+    dest: "{{ containerd_conf }}"
+    content: |
+      overlay
+      br_netfilter
+
+- name: Execute modprobe for the overlay
+  become: true
+  command: modprobe overlay
+
+- name: Execute modprobe for br_netfilter
+  become: true
+  command: modprobe br_netfilter
+
+- name: Setup required sysctl params, these persist across reboots
+  copy:
+    dest: "{{ containerd_sysctl }}"
+    content: |
+      net.bridge.bridge-nf-call-iptables  = 1
+      net.ipv4.ip_forward                 = 1
+      net.bridge.bridge-nf-call-ip6tables = 1
+
+- name: Apply sysctl params without reboot
+  become: true
+  command: systemctl --system
+
+- name: Create containerd directory for toml config
+  become: true
+  file:
+    path: "{{ containerd_toml_dir }}"
+    state: directory
+
+- include_tasks: setup-Debian.yml
+  when: ansible_os_family == 'Debian'
+
+
+- name: Apply containerd defaults to toml config
+  shell: >
+    containerd config default | sudo tee /etc/containerd/config.toml
+
+- name: Update containerd to use systemd CGroups
+  lineinfile:
+    path: containerd_toml_conf
+    insertafter: '^[plugins."io.containerd.grpc.v1.cri".containerd.runtimes.runc.options]'
+    line: '  SystemdCgroup = true'
+
+- name: restart containerd
+  notify:
+    - restart containerd

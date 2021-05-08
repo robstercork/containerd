@@ -1,2 +1,8 @@
 ---
 # defaults file for robstercork.containerd
+containerd_package: 'containerd'
+containerd_package_state: present
+containerd_conf: /etc/modules-load.d/containerd.conf
+containerd_sysctl: /etc/sysctl.d/99-kubernetes-cri.conf
+containerd_toml_dir: /etc/containerd
+containerd_toml_conf: "{{ containerd_toml_dir }}"/config.toml
