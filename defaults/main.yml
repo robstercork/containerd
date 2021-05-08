@@ -5,4 +5,13 @@ containerd_package_state: present
 containerd_conf: /etc/modules-load.d/containerd.conf
 containerd_sysctl: /etc/sysctl.d/99-kubernetes-cri.conf
 containerd_toml_dir: /etc/containerd
-containerd_toml_conf: "{{ containerd_toml_dir }}"/config.toml
+containerd_toml_conf: "{{ containerd_toml_dir }}/config.toml"
+
+# Used for my specific raspberry OS
+docker_repo_url: https://download.docker.com/linux
+docker_apt_release_channel: stable
+docker_apt_arch: armhf
+os_distribution: raspbian
+docker_apt_repository: "deb [arch={{ docker_apt_arch }}] {{ docker_repo_url }}/{{ os_distribution }} {{ ansible_distribution_release }} {{ docker_apt_release_channel }}"
+docker_apt_ignore_key_error: true
+docker_apt_gpg_key: "{{ docker_repo_url }}/{{ os_distribution }}/gpg"

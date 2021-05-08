@@ -36,6 +36,10 @@
 - include_tasks: setup-Debian.yml
   when: ansible_os_family == 'Debian'
 
+- name: Install containerd.
+  package:
+    name: "{{ containerd_package }}"
+    state: "{{ containerd_package_state }}"
 
 - name: Apply containerd defaults to toml config
   shell: >
@@ -43,10 +47,8 @@
 
 - name: Update containerd to use systemd CGroups
   lineinfile:
-    path: containerd_toml_conf
-    insertafter: '^[plugins."io.containerd.grpc.v1.cri".containerd.runtimes.runc.options]'
-    line: '  SystemdCgroup = true'
-
-- name: restart containerd
-  notify:
-    - restart containerd
+    path: "{{ containerd_toml_conf }}"
+    regexp: '^.*containerd.runtimes.runc.options'
+    insertafter: '^.*containerd.runtimes.runc.options'
+    line: '          SystemdCgroup = true'
+  notify: restart containerd

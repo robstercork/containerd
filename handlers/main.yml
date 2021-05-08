@@ -1,5 +1,6 @@
 ---
 # handlers file for robstercork.containerd
 - name: restart containerd
-  service: containerd
-  state: restarted
+  service:
+   name: containerd
+   state: restarted
